@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>FriendFinder</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+    <!-- CSS -->
+    <style>
+        form {
+            width: 90%;
+            max-width: 1000px;
+            margin: auto;
+            margin-top: 2%;
+        }
+        footer,
+        .row{
+            text-align: center;
+        }
+        li.empty,
+        .form-group.empty label{
+            color: red;
+        }
+        li.empty .qScore,
+        .form-group.empty .qText
+        {
+            border-color: red;
+        }
+        .header{
+            text-align: center;
+            background: #337ab7;
+            color: white;
+            padding: 1.5%;
+            width: 100%;
+        }
+        .subTitle{
+            color: #337ab7;
+            font-weight: bold;
+        }
+        img {
+            width: 80%;;
+        }
+    </style>
+</head>
+
+<body>
+    
+    <!-- Header -->
+    <div class="header">
+        <h2>Survey Questions</h2>
+    </div> 
+
+    <!-- Form -->
+    <form>
+        <div>
+            <h3 class="subTitle">User Info</h3>
+        </div>
+        <div class="form-group">
+            <label for="name">Full Name</label>
+            <input type="text" class="qText form-control" id="name" required>
+        </div>
+        <div class="form-group">
+            <label for="picURL">Link to Photo Image</label>
+            <input type="text" class="qText form-control" id="picURL" required>
+        </div>
+        <hr>
+        <div>
+            <h3 class="subTitle">Questions</h3>
+        </div>
+        <ol id = "qList">
+        </ol>
+        <br>
+        <button type="button" class="btn btn-primary btn-lg btn-block" id="submit">
+            <i class="fa fa-check-circle" aria-hidden="true"></i>
+            Submit
+        </button>    
+    </form> 
+
+    <br>
+    <hr>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>
+                <a href="/api/friends">API Friends List</a> | 
+                <a href="https://github.com/afhaque/friendfinder">GitHub Repo</a>
+            </p>
+        </div>
+    </footer>    
+
+    
+    <!-- Modal -->
+    <div id="matchModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h2 class="modal-title"><strong>Best Match</strong></h2>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <h2 class="subTitle" id="matchName"></h2>
+                </div>
+                <div class="row">
+                    <img id="matchPhoto" src="https://media.licdn.com/mpr/mpr/shrinknp_400_400/p/6/005/064/1bd/3435aa3.jpg" alt="">
+                </div>                
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script type="text/javascript">
+
+        var form = {
+            answers: {},
+            questions: [
+                "Your mind is always buzzing with unexplored ideas and plans.",
+                "Generally speaking, you rely more on your experience than your imagination.",
+                "You find it easy to stay relaxed and focused even when there is some pressure.",
+                "You rarely do something just out of sheer curiosity.",
+                "People can rarely upset you.",
+                "It is often difficult for you to relate to other people’s feelings.",
+                "In a discussion, truth should be more important than people’s sensitivities.",
+                "You rarely get carried away by fantasies and ideas.",
+                "You think that everyone’s views should be respected regardless of whether they are supported by facts or not",
+                "You feel more energetic after spending time with a group of people."
+            ],
+            addRemoveClass: function(field, action, cssClass) {
+                field[action](cssClass);
+            },
+            clearForm: function() {
+                this.answers = {
+                    name:"",
+                    picURL:"",
+                    scores:[]
+                };
+            },
+            getQHtml: function(index) {
+            return `<li>
+                        <div class="form-group">
+                            <label for="q${index}">${this.questions[index]}</label>
+                            <select class="qScore form-control" id="q${index}">
+                                <option value=""></option>
+                                <option value="1">1 (Strongly Disagree)</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5 (Strongly Agree)</option>
+                            </select>
+                        </div>
+                    </li>`          
+            },
+            init: function() {
+                var html;
+                for(var i = 0; i<this.questions.length; i++)
+                {
+                    html = this.getQHtml(i);
+                    $("#qList").append(html);
+                }
+            },
+            isBlank: function(val) {
+                return val === "";
+            },
+            setAnswers: function() {
+                var formAnswers = $("form")[0],
+                    self = this,
+                    score = "",
+                    formQ = "";
+
+                self.clearForm();
+
+                for (var i = 0; i < formAnswers.length; i++)
+                {
+                    formQ = formAnswers[i];
+                    if (formQ.classList.contains("qText"))
+                    {
+                        self.answers[formQ.id] = formQ.value;
+                    }
+                    else if(formQ.classList.contains("qScore"))
+                    {
+                        score = isNaN(parseInt(formQ.value)) ? formQ.value : parseInt(formQ.value);
+                        self.answers.scores.push(score);
+                    }
+                }
+            }, 
+            showModal: function(match) {
+                $("#matchName").text(match.name);
+                $("#matchPhoto").attr("src", match.picUrl);
+                $("#matchModal").modal("toggle")
+            },
+            submit: function() {
+                var self = this;
+                
+                self.setAnswers();
+
+                if (self.validate()) 
+                {
+                    $.post("/api/friends", self.answers, function(data) {
+                        self.showModal(data);
+                    });
+                } 
+                else 
+                {
+                    alert("Please fill out all fields before submitting!");
+                }        
+            },
+            validate: function() {
+                var aObj = this.answers,
+                    action,
+                    empty = 0;
+                for(prop in aObj)
+                {
+                    if(typeof aObj[prop] === "string")
+                    {
+                        action = (this.isBlank(aObj[prop])) ? "addClass" : "removeClass";
+                        this.addRemoveClass($(`#${prop}`).parent(),action, "empty");
+                        if (action === "addClass") empty ++;
+                    }
+                    else
+                    {
+                        for (var i = 0; i < aObj[prop].length; i++)
+                        {
+                            action = (this.isBlank(aObj[prop][i])) ? "addClass" : "removeClass";
+                            this.addRemoveClass($(`#q${i}`).parent().parent(),action, "empty");
+                            if (action === "addClass") empty ++;
+                        }
+                    }
+                }
+                
+                return empty === 0;
+            }
+        };
+
+        form.init();
+
+        $("#submit").on("click", function(event) {
+            form.submit();
+        });
+
+        $(".form-control").on("change", function(e) {
+            var action = (e.currentTarget.value === "") ? "addClass" : "removeClass",
+                id = e.currentTarget.id,
+                field = (e.currentTarget.classList.contains("qScore")) ? 
+                        $(`#${id}`).parent().parent() : 
+                        $(`#${id}`).parent();
+
+            form.addRemoveClass(field, action, "empty");
+        });
+
+        $('#matchModal').on('hidden.bs.modal', function (e) {
+            window.location.href = "/exit";
+        })
+
+    </script>
+
+</body>
+
+</html>

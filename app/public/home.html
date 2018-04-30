@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>FriendFinder</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+    <!-- CSS -->
+    <style>
+        footer{
+            text-align: center;
+        }
+        .header{
+            text-align: center;
+            background: #337ab7;
+            color: white;
+            padding: 1.5%;
+            width: 100%;
+        }
+        .welcome{
+            width: 75%;
+            margin: auto;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <div class="header">
+        <h1><i class="fa fa-facebook-square" aria-hidden="true"></i> Friend Finder </h1>
+    </div> 
+
+    <!-- Welcome -->
+    <div class="welcome">
+        <h3>Searching for a friend that shares your interests?</h3>
+        <hr>
+        <h4>Take our short 10 question and you'll be well on your way.</h4>
+        <h4>We'll compare your answers to our database of users to find the best match.</h4>
+        <hr>
+        <div>
+            <a href="/survey">
+                <button type="button" class="btn btn-md btn-primary">
+                    <h4>
+                        <span class="glyphicon glyphicon-list-alt"></span> 
+                        Take Survey
+                    </h4>
+                </button>
+            </a>
+        </div>
+    </div> 
+
+    <br>
+    <hr>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>
+                <a href="/api/friends">API Friends List</a> | 
+                <a href="https://github.com/afhaque/friendfinder">GitHub Repo</a>
+            </p>
+        </div>
+    </footer>
+
+</body>
+
+</html>
